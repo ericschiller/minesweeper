@@ -1,5 +1,6 @@
 var ms = {
   grid_size: 0,
+  mine_size: 0,
   grid: [],
   create_grid : function(size){
     this.grid_size = size;
@@ -13,15 +14,23 @@ var ms = {
     $('#grid .tile').click(function(){
       var t = $(this).attr('id').split('_');
       temp_tile = ms.tile_find(parseInt(t[0]), parseInt(t[1]));
-      $(this).text(temp_tile.find_mines());
       if (temp_tile.mine){
-        $(this).css('background-color', 'red');
+        $(this).css('background-color', 'red').text('☼');
       }
+      else{
+        var mine_count = temp_tile.find_mines();
+        $(this).css('background-color', '#E6E6E6');
+        if (mine_count > 0){
+          $(this).text(mine_count);
+        }
+      }
+
     });
 
 
   },
   mine_generate : function(mines){
+    this.mine_size = mines;
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min);
     }
@@ -40,6 +49,11 @@ var ms = {
     if(item != undefined && item.x === x && item.y === y){
       return item;
     }
+  },
+  clear: function(){
+    $('.tile').remove();
+    ms.grid = [];
+    ms.init(ms.grid_size, ms.mine_size);
   },
   init: function(size, mines){
     ms.create_grid(size);

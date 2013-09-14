@@ -1,7 +1,10 @@
 .tile{
   width: 28px;
-  height: 28px;
-  background-color: grey;
+  padding-top: 5px;
+  height: 23px;
+  background-color: #A4A4A4;
   border: 1px solid black;
   float: left;
+  text-align: center;
+  font-family: 'helvetica neue', helvetica;
 }
