@@ -4,21 +4,13 @@ var ms = {
   grid: [],
   create_grid : function(size){
     this.grid_size = size;
-    for( i = 1; i <= size; i++){
-      for( k = 1; k <= size; k++){
+    for(var i = 1; i <= size; i++){
+      for(var k = 1; k <= size; k++){
         this.grid.push(new Tile(k, i));
         $('#grid').append('<div class="tile" id="' + k + '_' + i + '"></div>').css('width', this.grid_size * 30);
 
       }
     }
-    $('#grid .tile').click(function(){
-      var t = $(this).attr('id').split('_');
-      console.log(this);
-      temp_tile = ms.tile_find(parseInt(t[0]), parseInt(t[1]));
-      temp_tile.find_mines();
-    });
-
-
   },
   mine_generate : function(mines){
     this.mine_size = mines;
@@ -37,7 +29,7 @@ var ms = {
   },
   tile_find: function(x,y){
     var item =  ms.grid[(ms.grid_size * y - ms.grid_size + x - 1)];
-    if(item != undefined && item.x === x && item.y === y){
+    if(item !== undefined && item.x === x && item.y === y){
       return item;
     }
   },
@@ -47,63 +39,69 @@ var ms = {
     ms.init(ms.grid_size, ms.mine_size);
   },
   init: function(size, mines){
+    document.oncontextmenu = function() {return false;};
     ms.create_grid(size);
     ms.mine_generate(mines);
+    $('#grid .tile').mousedown(function(e){
+      var t = $(this).attr('id').split('_');
+      temp_tile = ms.tile_find(parseInt(t[0]), parseInt(t[1]));
+      if( e.button === 0 ) { 
+        temp_tile.find_mines();
+      }
+      else if( e.button === 2 && temp_tile.checked === false) {
+        if (temp_tile.flagged === false){
+          temp_tile.flagged = true;
+          $(this).css('background-color', 'deepskyblue').text('⚑');
+        }
+        else{
+          temp_tile.flagged = false;
+          $(this).css('background-color', '#A4A4A4').text('');
+        }
+      } 
+    });
   }
-
-}
-
+};
 var Tile = function(x, y) {
     this.x = x;
     this.y = y;
     this.mine = false;
     this.checked = false;
+    this.flagged = false;
     this.id = '#' + this.x + '_' + this.y;
+    this.count = 0;
     this.find_mines = function(){
-      if (this.mine){
+      if(this.mine && this.flagged === false){
         $(this.id).css('background-color', 'red').text('☼');
       }
-      else{
+      else if (this.checked === false && this.flagged === false){
         $(this.id).css('background-color', '#E6E6E6');
-        this.checked = true;
-        var count = 0;
         var _x = [this.x, this.x + 1, this.x - 1];
         var _y = [this.y, this.y + 1, this.y - 1];
-        for( i = 0; i < _x.length; i++){
-          for( j = 0; j < _y.length; j++){
+        var hit = [];
+        for(var i = 0; i < _x.length; i++){
+          for(var j = 0; j < _y.length; j++){
             var tile = ms.tile_find(_x[i], _y[j]);
-            if (tile != undefined && tile != this && this.checked != true){
-              tile.find_mines();
-              count +=(tile.mine ? 1 : 0);
+            if (tile !==undefined && tile !==this && tile.checked === false){
+              this.count +=(tile.mine ? 1 : 0);
+              this.checked = true;
+              if(tile.mine === false){
+                hit.push(tile);
+              }
             }
           }
         }
-        if (count > 0){
-          $(this.id).text(count);
+        if (this.count > 0){
+          $(this.id).text(this.count);
         }
         else{
+          $.each(hit, function(tile){
+            hit[tile].find_mines();
+          });
         }
       }
     };
-    this.around = function(){
-      var _x = [this.x, this.x + 1, this.x - 1];
-      var _y = [this.y, this.y + 1, this.y - 1];
-      console.log('start ' + this.x + "  " + this.y);
-      var to_check = [];
-      for( k = 0; k < _x.length; k++){
-        for( l = 0; l < _y.length; l++){
-          console.log(_x[k] + "  " + _y[l]);
-          var tile = ms.tile_find(_x[k], _y[l]);
-          if (tile != undefined && tile.checked === false ) {
-            to_check.push(tile);
-          }
-        }
-      }
-      $.each(to_check, function(thing){
-        to_check[thing].find_mines();
-      });
-    }
 };
 
-ms.init(8, 10);
-console.log(ms.grid);
+$(document).ready(function(){ 
+  ms.init(8, 10);
+});
