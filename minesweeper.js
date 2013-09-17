@@ -8,7 +8,6 @@ var ms = {
       for(var k = 1; k <= size; k++){
         this.grid.push(new Tile(k, i));
         $('#grid').append('<div class="tile" id="' + k + '_' + i + '"></div>').css('width', this.grid_size * 30);
-
       }
     }
   },
@@ -17,7 +16,7 @@ var ms = {
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min);
     }
-    for (i = 1; i<= mines; i++){
+    for (var i = 1; i<= mines; i++){
       var roll = getRandomInt(1, ms.grid_size * ms.grid_size - 1);
       if (ms.grid[roll].mine){
         i--;
@@ -44,7 +43,7 @@ var ms = {
     ms.mine_generate(mines);
     $('#grid .tile').mousedown(function(e){
       var t = $(this).attr('id').split('_');
-      temp_tile = ms.tile_find(parseInt(t[0]), parseInt(t[1]));
+      var temp_tile = ms.tile_find(parseInt(t[0]), parseInt(t[1]));
       if( e.button === 0 ) { 
         temp_tile.find_mines();
       }
@@ -101,7 +100,7 @@ var Tile = function(x, y) {
       }
     };
 };
-
 $(document).ready(function(){ 
   ms.init(8, 10);
 });
+
