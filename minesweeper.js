@@ -59,8 +59,8 @@ var ms = {
       }
       else {winning = false};
     }
-    if(winning){alert("You've won!")}
-    else { alert("Sorry, try again")};
+    if(winning){alert("You've won!"); ms.new_game();}
+    else { alert("Sorry, try again.")};
   },
   init: function(size, mines){
     document.oncontextmenu = function() {return false;};
