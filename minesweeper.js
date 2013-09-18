@@ -2,6 +2,9 @@ var ms = {
   grid_size: 0,
   mine_size: 0,
   grid: [],
+  getRandomInt: function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  },
   create_grid : function(size){
     this.grid_size = size;
     for(var i = 1; i <= size; i++){
@@ -13,11 +16,9 @@ var ms = {
   },
   mine_generate : function(mines){
     this.mine_size = mines;
-    function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1) + min);
-    }
+    
     for (var i = 1; i<= mines; i++){
-      var roll = getRandomInt(1, ms.grid_size * ms.grid_size - 1);
+      var roll = this.getRandomInt(1, ms.grid_size * ms.grid_size - 1);
       if (ms.grid[roll].mine){
         i--;
       }
@@ -32,15 +33,48 @@ var ms = {
       return item;
     }
   },
-  clear: function(){
+  cheat: function(){
+    for (var t = 0; t <= ms.grid_size * ms.grid_size; t++){
+      if (ms.grid[t] === undefined){
+        alert("That's all the mines cheater!");
+        ms.new_game();
+        break;
+      }
+      else if(ms.grid[t].mine && ms.grid[t].flagged === false){
+        ms.grid[t].flag();
+        break
+      }
+    }
+  },
+  new_game: function(){
     $('.tile').remove();
     ms.grid = [];
     ms.init(ms.grid_size, ms.mine_size);
+  },
+  score: function(){
+    var winning = false;
+    for (var t = 0; t <= ms.grid_size * ms.grid_size - 1; t++){
+      if(ms.grid[t].mine && ms.grid[t].flagged){
+        winning = true;
+      }
+      else {winning = false};
+    }
+    if(winning){alert("You've won!")}
+    else { alert("Sorry, try again")};
   },
   init: function(size, mines){
     document.oncontextmenu = function() {return false;};
     ms.create_grid(size);
     ms.mine_generate(mines);
+    $('#cheat').unbind().click(function(){
+      ms.cheat();
+    });
+    $('#new').unbind().click(function(){
+      ms.new_game();
+    });
+    $('#score').unbind().click(function(){
+      ms.score();
+    });
     $('#grid .tile').mousedown(function(e){
       var t = $(this).attr('id').split('_');
       var temp_tile = ms.tile_find(parseInt(t[0]), parseInt(t[1]));
@@ -48,14 +82,7 @@ var ms = {
         temp_tile.find_mines();
       }
       else if( e.button === 2 && temp_tile.checked === false) {
-        if (temp_tile.flagged === false){
-          temp_tile.flagged = true;
-          $(this).css('background-color', 'deepskyblue').text('⚑');
-        }
-        else{
-          temp_tile.flagged = false;
-          $(this).css('background-color', '#A4A4A4').text('');
-        }
+        temp_tile.flag();
       } 
     });
   }
@@ -68,9 +95,21 @@ var Tile = function(x, y) {
     this.flagged = false;
     this.id = '#' + this.x + '_' + this.y;
     this.count = 0;
+    this.flag = function(){
+      if (this.flagged === false){
+        this.flagged = true;
+        $(this.id).css('background-color', 'deepskyblue').text('⚑');
+        }
+        else{
+          this.flagged = false;
+          $(this.id).css('background-color', '#A4A4A4').text('');
+        }
+    };
     this.find_mines = function(){
       if(this.mine && this.flagged === false){
         $(this.id).css('background-color', 'red').text('☼');
+        alert('Game over man.  Press "OK" to start a new game.');
+        ms.new_game();
       }
       else if (this.checked === false && this.flagged === false){
         $(this.id).css('background-color', '#E6E6E6');
@@ -100,6 +139,7 @@ var Tile = function(x, y) {
       }
     };
 };
+
 $(document).ready(function(){ 
   ms.init(8, 10);
 });
