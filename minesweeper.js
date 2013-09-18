@@ -42,7 +42,7 @@ var ms = {
       }
       else if(ms.grid[t].mine && ms.grid[t].flagged === false){
         ms.grid[t].flag();
-        break
+        break;
       }
     }
   },
